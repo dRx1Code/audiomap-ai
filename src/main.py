@@ -1,30 +1,33 @@
 
-from src.vision.detection import organizar_deteccoes
+from ultralytics import YOLO
+
+from src.vision.detection import (
+    detectar_objetos,
+    organizar_deteccoes
+)
+
 from src.intelligence.scene_analysis import descrever_cena
 
 
 def main():
-    largura_imagem = 1280
+    print("=" * 40)
+    print("AUDIOMAP AI")
+    print("=" * 40)
 
-    # Simulação dos objetos identificados
-    deteccoes = [
-        {"nome": "cadeira", "x_centro": 200},
-        {"nome": "mesa", "x_centro": 1050},
-        {"nome": "pessoa", "x_centro": 640}
-    ]
+    modelo = YOLO("yolo11n.pt")
 
-    # Organiza os objetos e identifica suas posições
+    deteccoes, largura_imagem = detectar_objetos(
+        "bus.jpg",
+        modelo
+    )
+
     objetos = organizar_deteccoes(
         deteccoes,
         largura_imagem
     )
 
-    # Transforma os dados em uma descrição
     descricao = descrever_cena(objetos)
 
-    print("=" * 40)
-    print("AUDIOMAP AI")
-    print("=" * 40)
     print("\nDescrição do ambiente:")
     print(descricao)
 

@@ -9,3 +9,4 @@ __pycache__/
 *.tmp
 models/*.pt
 models/*.onnx
+*.pt
