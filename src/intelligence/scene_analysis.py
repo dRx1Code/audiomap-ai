@@ -2,7 +2,7 @@
 def descrever_cena(objetos: list[dict]) -> str:
     """
     Organiza os objetos detectados por posição e prioridade,
-    gerando uma descrição textual da cena.
+    gerando uma descrição textual mais natural da cena.
     """
 
     if not objetos:
@@ -64,6 +64,8 @@ def descrever_cena(objetos: list[dict]) -> str:
             key=lambda item: prioridades.get(item[0], 5)
         )
 
+        descricoes_itens = []
+
         for nome, quantidade in itens:
             singular, plural = nomes.get(
                 nome,
@@ -75,8 +77,12 @@ def descrever_cena(objetos: list[dict]) -> str:
             else:
                 descricao = f"{quantidade} {plural}"
 
-            descricoes.append(
-                f"{posicao.capitalize()}: {descricao}"
-            )
+            descricoes_itens.append(descricao)
+
+        conteudo = ", ".join(descricoes_itens)
+
+        descricoes.append(
+            f"{posicao.capitalize()}, há {conteudo}"
+        )
 
     return ". ".join(descricoes) + "."

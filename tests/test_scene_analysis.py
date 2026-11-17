@@ -11,13 +11,10 @@ def test_prioridade_dos_objetos():
 
     resultado = descrever_cena(objetos)
 
-    esperado = (
-        "No centro: um ônibus. "
-        "No centro: uma pessoa. "
-        "No centro: uma garrafa."
-    )
+    esperado = "No centro, há um ônibus, uma pessoa, uma garrafa."
 
     assert resultado == esperado
+
 
 def test_contagem_de_objetos():
     objetos = [
@@ -28,7 +25,8 @@ def test_contagem_de_objetos():
 
     resultado = descrever_cena(objetos)
 
-    assert resultado == "À esquerda: 3 pessoas."
+    assert resultado == "À esquerda, há 3 pessoas."
+
 
 def test_ordem_das_posicoes():
     objetos = [
@@ -40,9 +38,9 @@ def test_ordem_das_posicoes():
     resultado = descrever_cena(objetos)
 
     esperado = (
-        "No centro: um ônibus. "
-        "À esquerda: um carro. "
-        "À direita: uma pessoa."
+        "No centro, há um ônibus. "
+        "À esquerda, há um carro. "
+        "À direita, há uma pessoa."
     )
 
     assert resultado == esperado
