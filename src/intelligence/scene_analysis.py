@@ -1,7 +1,7 @@
 
 def descrever_cena(objetos: list[dict]) -> str:
     """
-    Agrupa objetos por posição e quantidade,
+    Organiza os objetos detectados por posição e prioridade,
     gerando uma descrição textual da cena.
     """
 
@@ -21,7 +21,24 @@ def descrever_cena(objetos: list[dict]) -> str:
         "bottle": ("uma garrafa", "garrafas"),
     }
 
-    ordem = ["à esquerda", "no centro", "à direita"]
+    prioridades = {
+        "person": 1,
+        "car": 1,
+        "bus": 1,
+        "motorcycle": 2,
+        "bicycle": 2,
+        "dog": 2,
+        "chair": 3,
+        "table": 3,
+        "cat": 3,
+        "bottle": 4,
+    }
+
+    ordem_posicoes = [
+        "no centro",
+        "à esquerda",
+        "à direita"
+    ]
 
     grupos = {}
 
@@ -32,17 +49,22 @@ def descrever_cena(objetos: list[dict]) -> str:
         if posicao not in grupos:
             grupos[posicao] = {}
 
-        grupos[posicao][nome] = grupos[posicao].get(nome, 0) + 1
+        grupos[posicao][nome] = (
+            grupos[posicao].get(nome, 0) + 1
+        )
 
     descricoes = []
 
-    for posicao in ordem:
+    for posicao in ordem_posicoes:
         if posicao not in grupos:
             continue
 
-        itens = []
+        itens = sorted(
+            grupos[posicao].items(),
+            key=lambda item: prioridades.get(item[0], 5)
+        )
 
-        for nome, quantidade in grupos[posicao].items():
+        for nome, quantidade in itens:
             singular, plural = nomes.get(
                 nome,
                 (nome, nome + "s")
@@ -53,10 +75,8 @@ def descrever_cena(objetos: list[dict]) -> str:
             else:
                 descricao = f"{quantidade} {plural}"
 
-            itens.append(descricao)
-
-        descricoes.append(
-            f"{posicao.capitalize()}: {', '.join(itens)}"
-        )
+            descricoes.append(
+                f"{posicao.capitalize()}: {descricao}"
+            )
 
     return ". ".join(descricoes) + "."

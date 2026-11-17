@@ -1,37 +1,6 @@
 
-from src.vision.positioning import identificar_posicao
-
-
-def organizar_deteccoes(
-    deteccoes: list[dict],
-    largura_imagem: int
-) -> list[dict]:
-    """
-    Organiza os objetos detectados e identifica suas posições.
-    """
-
-    objetos_organizados = []
-
-    for deteccao in deteccoes:
-        nome = deteccao["nome"]
-        x_centro = deteccao["x_centro"]
-
-        posicao = identificar_posicao(
-            x_centro,
-            largura_imagem
-        )
-
-        objeto = {
-            "objeto": nome,
-            "posicao": posicao
-        }
-
-        objetos_organizados.append(objeto)
-
-    return objetos_organizados
-
-    
 from ultralytics import YOLO
+
 from src.vision.positioning import identificar_posicao
 
 
@@ -52,6 +21,7 @@ def detectar_objetos(
     )
 
     deteccoes = []
+    largura = 0
 
     for resultado in resultados:
         altura, largura = resultado.orig_shape
@@ -79,15 +49,22 @@ def detectar_objetos(
 
 def organizar_deteccoes(
     deteccoes: list[dict],
-    largura_imagem: int
+    largura_imagem: int,
+    confianca_minima: float = 0.50
 ) -> list[dict]:
     """
-    Organiza os objetos detectados e identifica suas posições.
+    Organiza as detecções, filtra por confiança
+    e identifica a posição dos objetos.
     """
 
     objetos_organizados = []
 
     for deteccao in deteccoes:
+        confianca = deteccao.get("confianca", 0.0)
+
+        if confianca < confianca_minima:
+            continue
+
         nome = deteccao["nome"]
         x_centro = deteccao["x_centro"]
 
@@ -97,10 +74,10 @@ def organizar_deteccoes(
         )
 
         objeto = {
-    "objeto": nome,
-    "posicao": posicao,
-    "confianca": deteccao.get("confianca", 0.0)
-}
+            "objeto": nome,
+            "posicao": posicao,
+            "confianca": confianca
+        }
 
         objetos_organizados.append(objeto)
 
