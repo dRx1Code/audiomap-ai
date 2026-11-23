@@ -11,6 +11,7 @@ from src.vision.detection import (
 
 from src.vision.depth_estimation import EstimadorProfundidade
 from src.vision.spatial_analysis import associar_profundidade
+from src.vision.depth_comparison import comparar_profundidades
 
 from src.intelligence.scene_analysis import descrever_cena
 from src.audio.speech import AudioManager
@@ -164,6 +165,30 @@ def main():
             f"{objeto['proporcao_area'] * 100:.2f}%, "
             f"profundidade relativa = {profundidade_texto}"
         )
+
+    # Compara as profundidades relativas
+    comparacao = comparar_profundidades(objetos)
+
+    print("\nComparação de profundidade relativa:")
+
+    if not comparacao:
+        print("Nenhum objeto possui profundidade válida.")
+
+    for indice, objeto in enumerate(comparacao, start=1):
+        print(
+            f"{indice}. "
+            f"{objeto['objeto']} "
+            f"({objeto['posicao']}): "
+            f"{objeto['profundidade_relativa']}"
+        )
+
+        diferenca = objeto["diferenca_anterior"]
+
+        if diferenca is not None:
+            print(
+                f"   Diferença em relação ao anterior: "
+                f"{diferenca:.4f}"
+            )
 
     # Gera a descrição textual
     descricao = descrever_cena(objetos)
