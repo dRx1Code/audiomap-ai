@@ -27,19 +27,29 @@ def main():
         modelo
     )
 
-    # Organiza os objetos detectados
+    # Organiza as detecções
     objetos = organizar_deteccoes(
         deteccoes,
         largura_imagem
     )
 
-    # Gera a descrição textual
+    # Exibe os dados espaciais dos objetos
+    print("\nDados espaciais dos objetos:")
+
+    for objeto in objetos:
+        print(
+            f"{objeto['objeto']}: "
+            f"área ocupada = "
+            f"{objeto['proporcao_area'] * 100:.2f}%"
+        )
+
+    # Gera a descrição textual do ambiente
     descricao = descrever_cena(objetos)
 
     print("\nDescrição do ambiente:")
     print(descricao)
 
-    # Reproduz a descrição por voz
+    # Reproduz a descrição por áudio
     print("\nReproduzindo descrição...")
     audio.falar(descricao)
 

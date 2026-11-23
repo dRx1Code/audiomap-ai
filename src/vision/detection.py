@@ -9,7 +9,7 @@ def detectar_objetos(
     modelo: YOLO
 ) -> tuple[list[dict], int]:
     """
-    Detecta objetos em uma imagem usando YOLO.
+    Detecta objetos usando YOLO.
 
     Retorna as detecções e a largura da imagem.
     """
@@ -32,8 +32,24 @@ def detectar_objetos(
         for caixa in resultado.boxes:
             x1, y1, x2, y2 = caixa.xyxy[0].tolist()
 
+            # Calcula o centro horizontal do objeto
             x_centro = int((x1 + x2) / 2)
 
+            # Calcula as dimensões da caixa delimitadora
+            largura_caixa = x2 - x1
+            altura_caixa = y2 - y1
+
+            # Calcula a proporção da área ocupada pelo objeto
+            area_caixa = largura_caixa * altura_caixa
+            area_imagem = largura * altura
+
+            proporcao_area = (
+                area_caixa / area_imagem
+                if area_imagem > 0
+                else 0.0
+            )
+
+            # Identifica a classe e a confiança
             classe_id = int(caixa.cls[0])
             nome = resultado.names[classe_id]
             confianca = float(caixa.conf[0])
@@ -41,7 +57,8 @@ def detectar_objetos(
             deteccoes.append({
                 "nome": nome,
                 "x_centro": x_centro,
-                "confianca": round(confianca, 2)
+                "confianca": round(confianca, 2),
+                "proporcao_area": round(proporcao_area, 4)
             })
 
     return deteccoes, largura
@@ -55,6 +72,9 @@ def organizar_deteccoes(
     """
     Organiza as detecções, filtra por confiança
     e identifica a posição dos objetos.
+
+    Também preserva a proporção da área ocupada
+    pelo objeto na imagem.
     """
 
     objetos_organizados = []
@@ -76,7 +96,8 @@ def organizar_deteccoes(
         objeto = {
             "objeto": nome,
             "posicao": posicao,
-            "confianca": confianca
+            "confianca": confianca,
+            "proporcao_area": deteccao.get("proporcao_area", 0.0)
         }
 
         objetos_organizados.append(objeto)
