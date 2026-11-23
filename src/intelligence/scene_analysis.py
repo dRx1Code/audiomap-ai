@@ -1,9 +1,18 @@
 
-def descrever_cena(objetos: list[dict]) -> str:
+def descrever_cena(
+    objetos: list[dict],
+    limite_por_posicao: int = 3
+) -> str:
     """
     Organiza os objetos detectados por posição e prioridade,
-    gerando uma descrição textual mais natural da cena.
+    gerando uma descrição textual natural e objetiva.
+
+    limite_por_posicao: quantidade máxima de categorias
+    de objetos mencionadas em cada posição.
     """
+
+    if limite_por_posicao < 1:
+        raise ValueError("O limite deve ser pelo menos 1.")
 
     if not objetos:
         return "Não foram identificados objetos no ambiente."
@@ -64,9 +73,13 @@ def descrever_cena(objetos: list[dict]) -> str:
             key=lambda item: prioridades.get(item[0], 5)
         )
 
+        itens_prioritarios = itens[:limite_por_posicao]
+
+        categorias_omitidas = len(itens) - len(itens_prioritarios)
+
         descricoes_itens = []
 
-        for nome, quantidade in itens:
+        for nome, quantidade in itens_prioritarios:
             singular, plural = nomes.get(
                 nome,
                 (nome, nome + "s")
@@ -80,6 +93,13 @@ def descrever_cena(objetos: list[dict]) -> str:
             descricoes_itens.append(descricao)
 
         conteudo = ", ".join(descricoes_itens)
+
+        if categorias_omitidas == 1:
+            conteudo += " e mais 1 tipo de objeto"
+        elif categorias_omitidas > 1:
+            conteudo += (
+                f" e mais {categorias_omitidas} tipos de objetos"
+            )
 
         descricoes.append(
             f"{posicao.capitalize()}, há {conteudo}"
