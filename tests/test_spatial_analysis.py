@@ -5,7 +5,7 @@ import pytest
 from src.vision.spatial_analysis import associar_profundidade
 
 
-def test_calcular_mediana_da_regiao_do_objeto():
+def test_calcular_mediana_da_regiao_central():
     mapa = np.array([
         [1.0, 2.0, 3.0, 4.0],
         [5.0, 6.0, 7.0, 8.0],
@@ -18,17 +18,37 @@ def test_calcular_mediana_da_regiao_do_objeto():
         "caixa": {
             "x1": 0,
             "y1": 0,
-            "x2": 2,
-            "y2": 2
+            "x2": 4,
+            "y2": 4
         }
     }]
 
-    resultado = associar_profundidade(
-        deteccoes,
-        mapa
-    )
+    resultado = associar_profundidade(deteccoes, mapa)
 
-    assert resultado[0]["profundidade_relativa"] == 3.5
+    assert resultado[0]["profundidade_relativa"] == 8.5
+
+
+def test_ignorar_bordas_da_caixa():
+    mapa = np.array([
+        [100.0, 100.0, 100.0, 100.0],
+        [100.0, 2.0, 4.0, 100.0],
+        [100.0, 6.0, 8.0, 100.0],
+        [100.0, 100.0, 100.0, 100.0]
+    ], dtype=np.float32)
+
+    deteccoes = [{
+        "objeto": "bus",
+        "caixa": {
+            "x1": 0,
+            "y1": 0,
+            "x2": 4,
+            "y2": 4
+        }
+    }]
+
+    resultado = associar_profundidade(deteccoes, mapa)
+
+    assert resultado[0]["profundidade_relativa"] == 5.0
 
 
 def test_limitar_caixa_ao_tamanho_do_mapa():
@@ -49,7 +69,8 @@ def test_limitar_caixa_ao_tamanho_do_mapa():
 
     resultado = associar_profundidade(
         deteccoes,
-        mapa
+        mapa,
+        proporcao_interna=1.0
     )
 
     assert resultado[0]["profundidade_relativa"] == 2.5
@@ -73,7 +94,8 @@ def test_ignorar_valores_invalidos():
 
     resultado = associar_profundidade(
         deteccoes,
-        mapa
+        mapa,
+        proporcao_interna=1.0
     )
 
     assert resultado[0]["profundidade_relativa"] == 3.0
@@ -82,14 +104,9 @@ def test_ignorar_valores_invalidos():
 def test_retorna_none_sem_caixa_delimitadora():
     mapa = np.ones((10, 10), dtype=np.float32)
 
-    deteccoes = [{
-        "objeto": "person"
-    }]
+    deteccoes = [{"objeto": "person"}]
 
-    resultado = associar_profundidade(
-        deteccoes,
-        mapa
-    )
+    resultado = associar_profundidade(deteccoes, mapa)
 
     assert resultado[0]["profundidade_relativa"] is None
 
@@ -99,6 +116,16 @@ def test_rejeitar_mapa_com_dimensoes_invalidas():
 
     with pytest.raises(ValueError):
         associar_profundidade([], mapa)
+
+
+def test_rejeitar_proporcao_interna_invalida():
+    mapa = np.ones((10, 10), dtype=np.float32)
+
+    with pytest.raises(ValueError):
+        associar_profundidade([], mapa, proporcao_interna=0)
+
+    with pytest.raises(ValueError):
+        associar_profundidade([], mapa, proporcao_interna=1.5)
 
 
 def test_nao_modificar_deteccoes_originais():
